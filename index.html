@@ -175,8 +175,8 @@
                 </form>
             </div>
             <div id="rsvp-confirmation" class="hidden text-center">
-                <h2 class="text-3xl font-bold text-purple-600 mb-4">Thank You!</h2>
-                <p class="text-lg">Your RSVP has been recorded. We can't wait to see you!</p>
+                <h2 id="confirmation-heading" class="text-3xl font-bold text-purple-600 mb-4"></h2>
+                <p id="confirmation-text" class="text-lg"></p>
             </div>
         </div>
 
@@ -211,13 +211,13 @@
 
         // --- START OF UPDATED RSVP FORM LOGIC ---
         const rsvpForm = document.getElementById('rsvp-form');
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxo88m5ortJ0mv4C1_T1tAAM2-gyrckegxYZtR0QFuPlI7T9UBAqV4XjskApWI9i2YTCg/exec"; // <-- IMPORTANT: PASTE YOUR URL HERE
+        const scriptURL = "https://script.google.com/macros/s/AKfycbxo88m5ortJ0mv4C1_T1tAAM2-gyrckegxYZtR0QFuPlI7T9UBAqV4XjskApWI9i2YTCg/exec"; 
 
         rsvpForm.addEventListener('submit', function(event) {
             event.preventDefault(); 
 
             const submitButton = rsvpForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true; // Disable button to prevent multiple submissions
+            submitButton.disabled = true;
             submitButton.innerText = 'Submitting...';
 
             fetch(scriptURL, { method: 'POST', body: new FormData(rsvpForm)})
@@ -226,23 +226,27 @@
 
                     const formContainer = document.getElementById('rsvp-form-container');
                     const confirmationMessage = document.getElementById('rsvp-confirmation');
+                    const confirmationHeading = document.getElementById('confirmation-heading');
+                    const confirmationText = document.getElementById('confirmation-text');
                     const attending = document.querySelector('input[name="attending"]:checked').value;
 
                     formContainer.style.display = 'none';
                     confirmationMessage.style.display = 'block';
 
-                    // Trigger confetti if attending
+                    // --- NEW LOGIC HERE ---
                     if (attending === 'yes') {
+                        // Set the message for "Yes"
+                        confirmationHeading.innerText = "Thank You!";
+                        confirmationText.innerText = "Your RSVP has been recorded. We can't wait to see you!";
+                        
+                        // Trigger confetti
                         const myCanvas = document.getElementById('confetti-canvas');
-                        const myConfetti = confetti.create(myCanvas, {
-                            resize: true,
-                            useWorker: true
-                        });
-                        myConfetti({
-                            particleCount: 200,
-                            spread: 160,
-                            origin: { y: 0.6 }
-                        });
+                        const myConfetti = confetti.create(myCanvas, { resize: true, useWorker: true });
+                        myConfetti({ particleCount: 200, spread: 160, origin: { y: 0.6 } });
+                    } else {
+                        // Set the message for "No"
+                        confirmationHeading.innerText = "Sorry you can't make it!";
+                        confirmationText.innerText = "Your RSVP has been recorded. Thanks for letting us know, you'll be missed!";
                     }
                 })
                 .catch(error => {
@@ -268,6 +272,5 @@
         window.addEventListener('scroll', revealOnScroll);
         document.addEventListener('DOMContentLoaded', revealOnScroll);
     </script>
-
 </body>
 </html>
